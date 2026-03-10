@@ -27,8 +27,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          docker build -t $ECR_REGISTRY/mysql-repo:latest ./mysql
+          docker build -t $ECR_REGISTRY/mysql-repo:latest -f Dockerfile_mysql .
           docker push $ECR_REGISTRY/mysql-repo:latest
 
-          docker build -t $ECR_REGISTRY/webapp-repo:latest ./webapp
+          docker build -t $ECR_REGISTRY/webapp-repo:latest -f Dockerfile .
           docker push $ECR_REGISTRY/webapp-repo:latest
