@@ -1,0 +1,36 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    [cite_start]branches: [ master ] # Triggers only on merge to master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # Required for Learner Lab
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and Push Images
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Build and push MySQL image 
+          docker build -t $ECR_REGISTRY/mysql-repo:latest ./mysql
+          docker push $ECR_REGISTRY/mysql-repo:latest
+          
+          # Build and push Application image 
+          docker build -t $ECR_REGISTRY/webapp-repo:latest ./webapp
+          docker push $ECR_REGISTRY/webapp-repo:latest
